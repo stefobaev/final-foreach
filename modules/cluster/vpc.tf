@@ -33,7 +33,11 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_eip" "nat_eip" {
+  count = lenght(var.private_subnets)
   vpc = true
+  depends_on = [
+    aws_internet_gateway.igw
+  ]
 
   tags = {
     Name = "NAT Gateway EIP"
@@ -41,6 +45,7 @@ resource "aws_eip" "nat_eip" {
 }
 
 resource "aws_nat_gateway" "nat" {
+  count = lenght(var.private_subnets)
   allocation_id = aws_eip.nat_eip.id
   subnet_id     = aws_subnet.public_subnet["Public1"].id
 
@@ -48,7 +53,7 @@ resource "aws_nat_gateway" "nat" {
     Name = "NAT Gateway"
   }
   depends_on = [
-    aws_internet_gateway.igw
+    aws_eip.nat_eip
   ]
 }
 
